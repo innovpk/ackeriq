@@ -1,21 +1,24 @@
 # AckerIQ — Orbital Agronomy & Variable-Rate Crop Rotation Planner
 
-**AckerIQ** closes the gap between coarse Earth-observation telemetry and in-cab farm machinery. By fusing live **NASA POWER agroclimatology**, **NASA SMAP L4 root-zone soil moisture**, **NASA MODIS NDVI & Land Surface Temperature**, **NASA SRTM 30 m terrain slope**, **ISRIC SoilGrids v2.0**, and **20 cm orthophoto imagery**, AckerIQ designs 4-year crop rotations and exports georeferenced **ISO 11783-10 (`TASKDATA.XML`)** and **GeoJSON** variable-rate Nitrogen prescriptions ready for tractor spreader terminals.
+- **Live Production Demo (Google Cloud Run):** https://ackeriq-188358032348.europe-west1.run.app
+- **2026 NASA Space Apps Challenge:** [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/)
+- **Source Code Repository:** https://github.com/innovpk/ackeriq
+- **Open-Source License:** OSI-approved [MIT License](./LICENSE)
 
-Licensed under the OSI-approved [MIT License](./LICENSE).
+**AckerIQ** closes the gap between coarse Earth-observation telemetry and in-cab farm machinery. By fusing live **NASA POWER agroclimatology & multi-decade climate-shift series**, **NASA SMAP L4 root-zone soil moisture**, **NASA MODIS NDVI & Land Surface Temperature**, **NASA SRTM / Copernicus DEM terrain slope**, **ISRIC SoilGrids v2.0**, and **20 cm orthophoto imagery**, AckerIQ designs 4-year crop rotations, evaluates custom crops against local soil moisture and heat stress, and exports georeferenced **ISO 11783-10 (`TASKDATA.XML`)** and **GeoJSON** variable-rate Nitrogen prescriptions ready for tractor spreader terminals.
 
 ---
 
 ## 1. Real-World Problem & Quantified Impact
 
 Arable farmers face three converging pressures:
-1. **Drought & Peak Summer Heat:** Falling July root-zone soil moisture (`SMAP L4`) and >30 °C heat waves slash spring cereal and maize yields.
+1. **Drought & Peak Summer Heat:** Multi-decade summer warming and falling July root-zone soil moisture (`SMAP L4` & `NASA POWER`) slash spring cereal and maize yields.
 2. **Fertilizer Costs & Nitrate Caps (`Rote Gebiete`):** Synthetic mineral Nitrogen (`KAS 27%`) drives farm input costs while winter bare-soil runoff contaminates drinking-water aquifers (>50 mg $\text{NO}_3^-$/L) and emits nitrous oxide ($\text{N}_2\text{O}$, **273×** the 100-year warming potential of $\text{CO}_2$, IPCC AR6).
-3. **Actionability Gap:** Satellite portals display raw raster layers (`NDVI`, `SMAP`), not local crop-contract economics (€/t), CAP/FAKT II eco-scheme eligibility, or tractor-ready prescription files.
+3. **Actionability Gap:** Satellite portals display raw raster layers (`NDVI`, `SMAP`), not local crop-contract economics (€/t), phytosanitary rotation breaks, CAP/FAKT II eco-scheme eligibility, or tractor-ready prescription files.
 
-For every farm coordinate or imported `.geojson` / `.kml` field boundary, AckerIQ quantifies:
-- **Net 4-Year Farm Margin (€/ha & total €)** using regional elevator basis quotes + EU GAP Eco-Scheme 2 & FAKT II cover/legume grants.
-- **Mineral Nitrogen Saved (% & €)** via biological $\text{N}_2$ fixation and winter catch-crop scavenging.
+For every farm coordinate worldwide or imported `.geojson` / `.kml` field boundary, AckerIQ quantifies:
+- **Net 4-Year Farm Margin (€/ha & total €)** using EU Eurostat + regional elevator basis quotes + EU GAP Eco-Scheme 2 & FAKT II cover/legume grants.
+- **Mineral Nitrogen Saved (% & €)** via biological $\text{N}_2$ fixation, historical 4-year carryover credits, and winter catch-crop scavenging.
 - **Climate Footprint Avoided ($\text{t CO}_2\text{e}$)** combining EU Haber-Bosch synthesis emissions, IPCC Tier-1 direct/indirect $\text{N}_2\text{O}$ flux, and winter cover-crop soil organic carbon sequestration.
 - **Groundwater $\text{NO}_3^-\text{-N}$ Leaching Prevented ($\text{kg N}$)**, **FAO-56 Soil Water Retained ($\text{m}^3$)**, and **RUSLE Hillside Topsoil Saved ($\text{t}$)**.
 
@@ -26,18 +29,18 @@ For every farm coordinate or imported `.geojson` / `.kml` field boundary, AckerI
 ```mermaid
 flowchart LR
   subgraph EO["Open Space & Earth Science APIs"]
-    POWER["NASA POWER Agroclimatology API\n(T2M, PRECTOTCORR, GWETROOT, ALLSKY_SFC_SW_DWN)"]
+    POWER["NASA POWER Agroclimatology & Monthly API\n(T2M, T2M_MAX, PRECTOTCORR, GWETROOT, ALLSKY_SFC_SW_DWN)"]
     GIBS["NASA GIBS WMTS\n(SMAP L4 Root Moisture, MODIS 8-Day NDVI, MODIS LST)"]
-    SRTM["NASA SRTM GL1 30m DEM\n(Elevation & Field Slope %)"]
+    SRTM["NASA SRTM / Copernicus DEM\n(Elevation & Field Slope %)"]
     SOIL["ISRIC SoilGrids v2.0\n(0-30cm Clay, Silt, Sand, SOC, pH, N)"]
     AERIAL["LGL-BW 20cm DOP20 WMS +\nEsri World Imagery"]
     WX["Open-Meteo Forecast\n(7-Day Rain/Wind Spreader Window)"]
   end
 
   subgraph APP["AckerIQ Next.js Engine"]
-    XRAY["/api/farm-xray & /api/farm-aerial\nCoordinate & GeoJSON/KML Ingestion"]
-    MODEL["Agronomy & Climate Engine\n(FAO-56 ETc, IPCC AR6 N2O, RUSLE Erosion)"]
-    ECON["Regional Market & Subsidy Stacker\n(Eurostat €/t + CAP Öko-Reg. 2 + FAKT II)"]
+    XRAY["/api/farm-xray, /api/geocode-farm & /api/farm-aerial\nGlobal Coordinate & GeoJSON/KML Ingestion"]
+    MODEL["Agronomy & Suitability Engine\n(FAO-56 ETc, IPCC AR6 N2O, RUSLE, 4-Yr Carryover)"]
+    ECON["Regional Market & Subsidy Stacker\n(Eurostat €/t + ECB FX + CAP Öko-Reg. 2 + FAKT II)"]
   end
 
   subgraph OUT["Farmer & Hardware Outputs"]
@@ -61,23 +64,29 @@ flowchart LR
 
 ---
 
-## 3. NASA & Partner Open Datasets Used
+## 3. NASA, Partner Open Datasets & Third-Party APIs Cited
 
-| Dataset / Agency | Parameters & Layers | Spatial / Temporal Resolution | Citation / Endpoint |
+Every space-agency and open institutional data source integrated in AckerIQ is listed below with its endpoint, resolution, DOI, and open license:
+
+| Dataset / Service | Parameters & Role | Resolution | Citation, Endpoint & License |
 | :--- | :--- | :--- | :--- |
-| **NASA POWER** (LaRC Agroclimatology) | `T2M`, `T2M_MAX`, `PRECTOTCORR`, `GWETROOT`, `GWETTOP`, `ALLSKY_SFC_SW_DWN` | $0.5^\circ \times 0.625^\circ$ (MERRA-2 / CERES), 12-month climatology | `https://power.larc.nasa.gov/api/temporal/climatology/point` · DOI: `10.5067/POWER` |
-| **NASA SMAP L4** via **NASA GIBS** | `SMAP_L4_Analyzed_Root_Zone_Soil_Moisture` | 9 km EASE-Grid 2.0, dynamic daily composite | `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/` · DOI: `10.5067/EVKPQZ4AFC4D` |
-| **NASA Terra MODIS** via **NASA GIBS** | `MODIS_Terra_NDVI_8Day` (`MOD13Q1`), `MODIS_Terra_Land_Surface_Temp_Day` (`MOD11A1`) | 250 m (NDVI 8-day Julian DOY) / 1 km (LST daily) | `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/` · DOI: `10.5067/MODIS/MOD13Q1.061` |
-| **NASA SRTM** Digital Elevation | Elevation ($z$) & orthogonal gradient slope (%) | 1 arc-second (~30 m) | `10.5067/MEaSUREs/SRTM/SRTMGL1.003` (queried via Open-Meteo Elevation API) |
-| **ISRIC SoilGrids v2.0** | `clay`, `silt`, `sand`, `soc`, `phh2o`, `nitrogen` (0–30 cm) | 250 m global | `https://rest.isric.org/soilgrids/v2.0/properties/query` · Poggio et al. (2021) |
-| **LGL-BW DOP20 & Esri Imagery** | `IMAGES_DOP_20_RGB` orthophotos + global satellite basemap | 20 cm (Baden-Württemberg) / 0.3–1 m global | `WMS_LGL-BW_ATKIS_DOP_20_C` & ArcGIS `World_Imagery` |
-| **Open-Meteo & Eurostat** | 7-day precipitation/wind forecast; regional grain & oilseed quotes | Hourly/Daily local point; regional market hubs | `/api/spreader-forecast` & `/api/crop-prices` |
+| **NASA POWER** (LaRC Agroclimatology) | `T2M`, `T2M_MAX`, `PRECTOTCORR`, `GWETROOT`, `GWETTOP`, `ALLSKY_SFC_SW_DWN` + `1991–2024` summer climate-shift delta | $0.5^\circ \times 0.625^\circ$ (MERRA-2 / CERES), monthly & climatology | `https://power.larc.nasa.gov/api/temporal/` · DOI: `10.5067/POWER` · NASA Open Data (Public Domain) |
+| **NASA SMAP L4** via **NASA GIBS** | `SMAP_L4_Analyzed_Root_Zone_Soil_Moisture` | 9 km EASE-Grid 2.0, latency-safe daily composite | `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/` · DOI: `10.5067/EVKPQZ4AFC4D` · NASA Open Data |
+| **NASA Terra MODIS** via **NASA GIBS** | `MODIS_Terra_NDVI_8Day` (`MOD13Q1`), `MODIS_Terra_Land_Surface_Temp_Day` (`MOD11A1`) | 250 m (8-day Julian DOY) / 1 km (daily LST) | `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/` · DOI: `10.5067/MODIS/MOD13Q1.061` & `MOD11A1.061` · NASA Open Data |
+| **NASA SRTM / Copernicus DEM** | Parcel elevation ($z$) & orthogonal gradient slope (%) | 30 m–90 m DEM | DOI: `10.5067/MEaSUREs/SRTM/SRTMGL1.003` queried via Open-Meteo Elevation API (`CC BY 4.0`) |
+| **ISRIC SoilGrids v2.0** | `clay`, `silt`, `sand`, `soc`, `phh2o`, `nitrogen` (0–30 cm) | 250 m global | `https://rest.isric.org/soilgrids/v2.0/properties/query` · Poggio et al. (2021) · `CC BY 4.0` |
+| **LGL Baden-Württemberg DOP20 WMS** | `IMAGES_DOP_20_RGB` digital orthophotos | 20 cm aerial imagery (BW) | `https://owsproxy.lgl-bw.de/owsproxy/ows/WMS_LGL-BW_ATKIS_DOP_20_C` · Datenlizenz Deutschland (`dl-de/by-2-0`) |
+| **Esri World Imagery & Labels** | Global optical satellite basemap & place boundaries | 0.3 m–1 m global | ArcGIS Online `World_Imagery` & `World_Boundaries_and_Places` (Esri, Maxar, Earthstar Geographics, USDA FSA, USGS) |
+| **Open-Meteo Weather Forecast API** | 7-day daily max/min temperature, precipitation, 10 m wind speed for DüV spreader window | Local coordinate forecast | `https://api.open-meteo.com/v1/forecast` · Open-Meteo (`CC BY 4.0`, DWD ICON / ECMWF) |
+| **EU Eurostat & LEL Schwäbisch Gmünd** | `apri_ap_crpouta` crop output prices (€/100 kg) + BW regional hub basis benchmarks | National & regional market quotes | `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apri_ap_crpouta` · EU Open Data (`CC BY 4.0`) |
+| **ECB Reference FX (Frankfurter)** | Live `USD`/`EUR` reference exchange rate | Daily ECB fix | `https://api.frankfurter.dev/v1/latest` · European Central Bank Open Data (MIT) |
+| **Komoot Photon & OSM Nominatim** | Forward farm address/coordinate search & reverse locality lookup | Street / parcel level | `https://photon.komoot.io/api` & `https://nominatim.openstreetmap.org` · © OpenStreetMap Contributors (`ODbL 1.0`) |
 
 ---
 
 ## 4. Scientific Methodology & Equations
 
-All calculations are implemented in [`src/lib/rotationEngine.ts`](./src/lib/rotationEngine.ts) and [`src/app/api/farm-xray/route.ts`](./src/app/api/farm-xray/route.ts):
+All calculations are implemented deterministically in [`src/lib/rotationEngine.ts`](./src/lib/rotationEngine.ts), [`src/lib/cropSuitability.ts`](./src/lib/cropSuitability.ts), and [`src/app/api/farm-xray/route.ts`](./src/app/api/farm-xray/route.ts):
 
 ### 4.1 FAO-56 Evapotranspiration & Crop Water Stress ($ET_0$, $ET_c$, $K_y$)
 Using NASA POWER surface shortwave solar irradiance (`ALLSKY_SFC_SW_DWN`, converted from $\text{kWh m}^{-2}\text{ d}^{-1}$ to $R_s$ in $\text{MJ m}^{-2}\text{ d}^{-1}$ via $\times 3.6$) and mean air temperature ($T_{\text{mean}}$), growing-season reference evapotranspiration (Apr–Sep) is computed via the Hargreaves–Makkink radiation-temperature formulation:
@@ -97,7 +106,7 @@ Annual net greenhouse gas intensity ($\text{kg CO}_2\text{e ha}^{-1}\text{ yr}^{
 - **Winter cover-crop soil organic carbon (SOC) sequestration:** $-440\text{ kg CO}_2\text{e ha}^{-1}\text{ yr}^{-1}$ when winter catch crops replace bare fallow (Poeplau & Don, 2015).
 
 ### 4.3 RUSLE Hillside Erosion & Groundwater $\text{NO}_3^-\text{-N}$ Leaching
-- **RUSLE ($A = R \cdot K \cdot LS \cdot C$):** Combines May–Aug erosive rainfall ($R$ from NASA POWER), silt/organic-matter soil erodibility ($K$ from ISRIC SoilGrids), slope steepness ($LS$ from NASA SRTM), and ground-cover factor ($C = 0.055$ under winter mulch vs. up to $0.36$ on bare spring slopes).
+- **RUSLE ($A = R \cdot K \cdot LS \cdot C$):** Combines May–Aug erosive rainfall ($R$ from NASA POWER), silt/organic-matter soil erodibility ($K$ from ISRIC SoilGrids), slope steepness ($LS$ from NASA SRTM / Copernicus DEM), and ground-cover factor ($C = 0.055$ under winter mulch vs. up to $0.36$ on bare spring slopes).
 - **Winter $\text{NO}_3^-\text{-N}$ Percolation:** Scales residual post-harvest mineral N by Nov–Feb percolation (`PRECTOTCORR`), sand/water-holding drainage susceptibility, and winter catch-crop root N scavenging ($-62\%$).
 
 ### 4.4 Georeferenced ISO 11783-10 (`TASKDATA.XML`) & GeoJSON Export
@@ -117,11 +126,35 @@ Farmers can click-draw a parcel or upload `.geojson` / `.kml` boundaries ([`src/
 npm install
 npm run dev
 ```
-Open `http://localhost:3000` (or `--port 3005` if `3000` is occupied). No proprietary API keys are required—all NASA Earthdata (`POWER`, `GIBS`), ISRIC SoilGrids, LGL-BW WMS, and Open-Meteo endpoints run out of the box with graceful regional fallbacks for offline rural connectivity.
+Open `http://localhost:3000` (or `npm run dev -- --port 3005` if port `3000` is occupied). No proprietary API keys or `.env` secrets are required—all NASA Earthdata (`POWER`, `GIBS`), ISRIC SoilGrids, LGL-BW WMS, Eurostat, and Open-Meteo endpoints run out of the box with graceful regional fallbacks for offline rural connectivity.
 
 ### Production Verification & Docker
 ```bash
 npm run lint
+npx tsc --noEmit
 npm run build
 ```
-A multi-stage [`Dockerfile`](./Dockerfile) (`output: "standalone"`) is included for container deployment on Google Cloud Run or any OCI host.
+A multi-stage [`Dockerfile`](./Dockerfile) (`output: "standalone"`) and [`deploy.sh`](./deploy.sh) script are included for container deployment on Google Cloud Run or any OCI host.
+
+---
+
+## 6. Open-Source Libraries & Visual Media Attribution
+
+All third-party software packages incorporated in AckerIQ are OSI-compliant open source:
+- **Next.js 16 & React 19** — MIT License (Vercel, Inc. & Meta Platforms, Inc.)
+- **Leaflet 1.9** — BSD-2-Clause License (Volodymyr Agafonkin & contributors)
+- **Recharts 3** — MIT License (Recharts Group)
+- **Lucide React** — ISC License (Lucide Contributors)
+- **Tailwind CSS 4** — MIT License (Tailwind Labs, Inc.)
+- **Illustrative Crop & Soil Thumbnails (`public/images/*.jpg`)** — Original hackathon-generated illustrative photography (released under this repository's [MIT License](./LICENSE)); all live parcel maps and satellite views come directly from NASA GIBS WMTS, LGL-BW DOP20 WMS, and Esri World Imagery.
+
+---
+
+## 7. Use of Artificial Intelligence (NASA Space Apps 2026 Disclosure)
+
+In accordance with the **2026 NASA International Space Apps Challenge** transparency rules:
+1. **Software Engineering & Research Assistance:** AI coding assistants (Google Antigravity / Gemini) were used during the hackathon window as pair-programming tools to accelerate TypeScript/React component scaffolding, Leaflet/ISOXML formatting utilities, bilingual (`EN`/`DE`) UI copy, and documentation structure.
+2. **Illustrative UI Thumbnails:** Static decorative crop, root-cutaway, and farm card thumbnails in `public/images/*.jpg` were synthesized using AI image generation for clean visual legibility.
+3. **Scientific Integrity & NASA Branding Compliance:**
+   - **Zero restricted NASA logos, insignia, flags, or mission emblems** were used, modified, or generated anywhere in the codebase or media assets.
+   - All Earth-observation layers, soil properties, climate-shift anomalies, crop suitability scores, FAO-56 water balances, IPCC AR6 $\text{N}_2\text{O}$ emissions, RUSLE erosion estimates, and ISO 11783-10 tractor prescriptions are computed **100% deterministically** from live public APIs and peer-reviewed equations—never hallucinated by an LLM at runtime.

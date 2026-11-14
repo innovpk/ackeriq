@@ -40,10 +40,12 @@ interface EurostatJson {
   };
 }
 
-async function fetchEurostatGermanyBenchmarks(): Promise<Record<
-  string,
-  number
-> | null> {
+interface EurostatBenchmarkResult {
+  prices: Record<string, number>;
+  trends: Partial<Record<"cereal" | "legume" | "oilseed", number>>;
+}
+
+async function fetchEurostatGermanyBenchmarks(): Promise<EurostatBenchmarkResult | null> {
   try {
     const url =
       "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apri_ap_crpouta?geo=DE&currency=EUR&sinceTimePeriod=2022";
@@ -55,24 +57,50 @@ async function fetchEurostatGermanyBenchmarks(): Promise<Record<
     if (!prodIdx || !timeIdx || !vals) return null;
 
     const nTimes = Object.keys(timeIdx).length;
-    const getLatestPer100kg = (code: string): number | null => {
+    const getLatestTwoPer100kg = (
+      code: string
+    ): { latest: number | null; prev: number | null } => {
       const p = prodIdx[code];
-      if (typeof p !== "number") return null;
+      if (typeof p !== "number") return { latest: null, prev: null };
+      let latest: number | null = null;
+      let prev: number | null = null;
       for (let t = nTimes - 1; t >= 0; t--) {
         const v = vals[String(p * nTimes + t)];
-        if (typeof v === "number" && Number.isFinite(v)) return v;
+        if (typeof v === "number" && Number.isFinite(v) && v > 0) {
+          if (latest === null) latest = v;
+          else if (prev === null) {
+            prev = v;
+            break;
+          }
+        }
       }
-      return null;
+      return { latest, prev };
     };
 
-    const softWheat = getLatestPer100kg("01110000"); // EUR/100kg -> *10 = EUR/t
-    const feedBarley = getLatestPer100kg("01300000");
-    const maltingBarley = getLatestPer100kg("01320000");
-    const maize = getLatestPer100kg("01500000");
-    const rapeseed = getLatestPer100kg("02110000");
-    const sunflower = getLatestPer100kg("02120000");
-    const soya = getLatestPer100kg("02130000");
-    const sugarBeetPerTon = getLatestPer100kg("02400000"); // Already EUR/1000kg
+    const pctDelta = (pair: { latest: number | null; prev: number | null }): number => {
+      if (!pair.latest || !pair.prev || pair.prev <= 0) return 0;
+      return Number(
+        Math.max(-6, Math.min(6, ((pair.latest - pair.prev) / pair.prev) * 100)).toFixed(1)
+      );
+    };
+
+    const softWheatPair = getLatestTwoPer100kg("01110000"); // EUR/100kg -> *10 = EUR/t
+    const feedBarleyPair = getLatestTwoPer100kg("01300000");
+    const maltingBarleyPair = getLatestTwoPer100kg("01320000");
+    const maizePair = getLatestTwoPer100kg("01500000");
+    const rapeseedPair = getLatestTwoPer100kg("02110000");
+    const sunflowerPair = getLatestTwoPer100kg("02120000");
+    const soyaPair = getLatestTwoPer100kg("02130000");
+    const sugarBeetPair = getLatestTwoPer100kg("02400000"); // Already EUR/1000kg
+
+    const softWheat = softWheatPair.latest;
+    const feedBarley = feedBarleyPair.latest;
+    const maltingBarley = maltingBarleyPair.latest;
+    const maize = maizePair.latest;
+    const rapeseed = rapeseedPair.latest;
+    const sunflower = sunflowerPair.latest;
+    const soya = soyaPair.latest;
+    const sugarBeetPerTon = sugarBeetPair.latest;
 
     const out: Record<string, number> = {};
     if (softWheat) {
@@ -108,69 +136,31 @@ async function fetchEurostatGermanyBenchmarks(): Promise<Record<
       out.sugar_beet_cover = beetEur;
     }
 
-    return Object.keys(out).length > 0 ? out : null;
+    if (Object.keys(out).length === 0) return null;
+
+    return {
+      prices: out,
+      trends: {
+        cereal: Number(((pctDelta(softWheatPair) + pctDelta(maizePair)) / 2).toFixed(1)),
+        legume: pctDelta(soyaPair),
+        oilseed: pctDelta(rapeseedPair),
+      },
+    };
   } catch {
     return null;
   }
 }
 
-async function fetchLiveExchangeAndFutures(): Promise<{
-  eurUsd: number;
-  trends: Partial<Record<"cereal" | "legume" | "oilseed", number>>;
-} | null> {
+async function fetchEcbExchangeRate(): Promise<number | null> {
   try {
     interface FxResp {
       rates?: { EUR?: number };
     }
-    interface YahooResp {
-      chart?: {
-        result?: Array<{
-          meta?: { regularMarketPrice?: number; chartPreviousClose?: number };
-        }>;
-      };
-    }
-
-    const [fx, wheatFut, cornFut, soyFut] = await Promise.all([
-      fetchJsonWithTimeout<FxResp>(
-        "https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR",
-        2800
-      ).catch(() => null),
-      fetchJsonWithTimeout<YahooResp>(
-        "https://query1.finance.yahoo.com/v8/finance/chart/ZW=F?interval=1d&range=5d",
-        2800
-      ).catch(() => null),
-      fetchJsonWithTimeout<YahooResp>(
-        "https://query1.finance.yahoo.com/v8/finance/chart/ZC=F?interval=1d&range=5d",
-        2800
-      ).catch(() => null),
-      fetchJsonWithTimeout<YahooResp>(
-        "https://query1.finance.yahoo.com/v8/finance/chart/ZS=F?interval=1d&range=5d",
-        2800
-      ).catch(() => null),
-    ]);
-
-    const pctMove = (r: YahooResp | null): number => {
-      const meta = r?.chart?.result?.[0]?.meta;
-      const cur = meta?.regularMarketPrice;
-      const prev = meta?.chartPreviousClose;
-      if (!cur || !prev || prev <= 0) return 0;
-      return Number(
-        Math.max(-6, Math.min(6, ((cur - prev) / prev) * 100)).toFixed(1)
-      );
-    };
-
-    const wheatMove = pctMove(wheatFut);
-    const cornMove = pctMove(cornFut);
-    const soyMove = pctMove(soyFut);
-
-    return {
-      eurUsd: fx?.rates?.EUR ?? 0.91,
-      trends: {
-        cereal: Number(((wheatMove + cornMove) / 2).toFixed(1)),
-        legume: soyMove,
-        oilseed: Number((soyMove * 0.7).toFixed(1)),
-      },
-    };
+    const fx = await fetchJsonWithTimeout<FxResp>(
+      "https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR",
+      2800
+    );
+    return typeof fx?.rates?.EUR === "number" ? fx.rates.EUR : null;
   } catch {
     return null;
   }
@@ -211,23 +201,24 @@ export async function GET(request: NextRequest) {
     lonParam
   );
 
-  const [eurostatPrices, liveMarkets] = await Promise.all([
+  const [eurostatBench, ecbEurUsd] = await Promise.all([
     fetchEurostatGermanyBenchmarks(),
-    fetchLiveExchangeAndFutures(),
+    fetchEcbExchangeRate(),
   ]);
 
   const liveSourcesUsed: string[] = [];
-  if (eurostatPrices) {
+  if (eurostatBench) {
     liveSourcesUsed.push("EU Eurostat DE Output Prices (Live)");
   } else {
     liveSourcesUsed.push("LEL Schwäbisch Gmünd BW Reference");
   }
-  if (liveMarkets) {
-    liveSourcesUsed.push("ECB FX + Live Commodity Spot Feed");
+  if (ecbEurUsd !== null) {
+    liveSourcesUsed.push("ECB Reference FX (Frankfurter Open API)");
   }
   liveSourcesUsed.push("Stuttgart / BW Local Hub Basis");
 
-  const hasCoords = Number.isFinite(latParam) && Number.isFinite(lonParam) && sp.has("lat");
+  const hasCoords =
+    Number.isFinite(latParam) && Number.isFinite(lonParam) && sp.has("lat");
   const inBw = !hasCoords || isInsideBadenWuerttemberg(latParam, lonParam);
 
   const basisCfg =
@@ -244,9 +235,9 @@ export async function GET(request: NextRequest) {
 
   for (const crop of Object.values(CROPS_HEILBRONN)) {
     const nationalBase =
-      eurostatPrices?.[crop.id] ?? crop.pricePerTonEur;
+      eurostatBench?.prices[crop.id] ?? crop.pricePerTonEur;
     const trendPct =
-      (crop.family !== "root" && liveMarkets?.trends[crop.family]) || 0;
+      (crop.family !== "root" && eurostatBench?.trends[crop.family]) || 0;
     const spotAdjustedBase = Math.round(
       nationalBase * (1 + trendPct * 0.004)
     );
@@ -280,7 +271,7 @@ export async function GET(request: NextRequest) {
     areaId: inBw ? resolvedAreaId : "regional-spot",
     areaMarketLabel: activeMarketHub,
     fertPriceEurKgN: 1.31,
-    eurUsdRate: liveMarkets?.eurUsd ?? 0.91,
+    eurUsdRate: ecbEurUsd ?? 0.91,
     liveSourcesUsed,
     fetchedAtIso: new Date().toISOString(),
     quotes,

@@ -74,6 +74,14 @@ export interface ParcelZone {
   note: string;
 }
 
+export interface ClimateShiftAnomaly {
+  baselinePeriod: string;
+  recentPeriod: string;
+  summerTempDeltaC: number;
+  summerMoistureDeltaPct: number;
+  liveMeasured: boolean;
+}
+
 export interface FarmXrayData {
   id: string;
   name: string;
@@ -93,6 +101,7 @@ export interface FarmXrayData {
   estimatedNLossPct: number;
   plainSummary: string;
   monthlyClimate: MonthlyClimatePoint[];
+  climateShift?: ClimateShiftAnomaly;
   soil: SoilProfile;
   parcels: ParcelZone[];
   liveSourcesUsed: string[];

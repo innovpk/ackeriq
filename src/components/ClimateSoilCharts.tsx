@@ -70,9 +70,23 @@ export function ClimateSoilCharts({
                 When Rain Washes Fertilizer Away vs. When Summer Dries Out
               </h3>
             </div>
-            <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-zinc-100 border border-zinc-200 text-zinc-600">
-              Jan – Dec Average
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {xray.climateShift && (
+                <span
+                  title={`NASA POWER summer (Jun–Aug) shift comparing ${xray.climateShift.baselinePeriod} vs. ${xray.climateShift.recentPeriod}`}
+                  className="text-xs font-mono px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-900 font-semibold"
+                >
+                  NASA Shift ({xray.climateShift.recentPeriod}):{" "}
+                  {xray.climateShift.summerTempDeltaC >= 0 ? "+" : ""}
+                  {xray.climateShift.summerTempDeltaC}°C ·{" "}
+                  {xray.climateShift.summerMoistureDeltaPct >= 0 ? "+" : ""}
+                  {xray.climateShift.summerMoistureDeltaPct}% moisture
+                </span>
+              )}
+              <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-zinc-100 border border-zinc-200 text-zinc-600">
+                Jan – Dec Average
+              </span>
+            </div>
           </div>
 
           <div className="h-48 sm:h-52 xl:h-56 w-full">

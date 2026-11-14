@@ -454,6 +454,7 @@ function pickBestAreaCandidate(
   fertPriceEurKgN: number,
   priceFeed: AreaPriceFeedResponse,
   customPrices?: Record<string, number>,
+  subsidies: SubsidyConfig = DEFAULT_SUBSIDIES,
   mode: "price_and_n" | "drought_resilience" = "price_and_n",
   blockedCropIds?: Set<string>
 ): CropSpec {
@@ -514,7 +515,8 @@ function pickBestAreaCandidate(
       true,
       fertPriceEurKgN,
       priceFeed,
-      customPrices
+      customPrices,
+      subsidies
     );
 
     const nextYearNCreditValueEur = c.nFixedCreditKgHa * fertPriceEurKgN * 0.9;
@@ -737,6 +739,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year1Blocked
     );
@@ -754,6 +757,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year2Blocked
     );
@@ -771,6 +775,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
     s2Year4 = pickBestAreaCandidate(
@@ -787,6 +792,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
   } else if (cerealHeavyHistory && !recentLegumeInHistory) {
@@ -805,6 +811,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year1Blocked
     );
@@ -822,6 +829,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year2Blocked
     );
@@ -839,6 +847,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
     s2Year4 = pickBestAreaCandidate(
@@ -855,6 +864,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
   } else {
@@ -872,6 +882,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year1Blocked
     );
@@ -889,6 +900,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n",
       year2Blocked
     );
@@ -906,6 +918,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
     s2Year4 = pickBestAreaCandidate(
@@ -935,6 +948,7 @@ export function generateRotationStrategies(
       fertPriceEurKgN,
       activePriceFeed,
       customPrices,
+      subsidies,
       "price_and_n"
     );
   }
@@ -981,6 +995,7 @@ export function generateRotationStrategies(
     fertPriceEurKgN,
     activePriceFeed,
     customPrices,
+    subsidies,
     "drought_resilience",
     year1Blocked
   );
@@ -1015,6 +1030,7 @@ export function generateRotationStrategies(
     fertPriceEurKgN,
     activePriceFeed,
     customPrices,
+    subsidies,
     "drought_resilience",
     year2Blocked
   );
@@ -1045,6 +1061,7 @@ export function generateRotationStrategies(
     fertPriceEurKgN,
     activePriceFeed,
     customPrices,
+    subsidies,
     "drought_resilience"
   );
 
@@ -1070,6 +1087,7 @@ export function generateRotationStrategies(
     fertPriceEurKgN,
     activePriceFeed,
     customPrices,
+    subsidies,
     "drought_resilience"
   );
 
@@ -1331,6 +1349,18 @@ export function generateRotationStrategies(
           xray
         )} Rotation`;
 
+  const climateShiftBullet = xray.climateShift
+    ? [
+        `NASA POWER multi-decade anomaly (${xray.climateShift.baselinePeriod} vs. ${
+          xray.climateShift.recentPeriod
+        }): summer max heat ${
+          xray.climateShift.summerTempDeltaC >= 0 ? "+" : ""
+        }${xray.climateShift.summerTempDeltaC.toFixed(1)}°C and root-zone moisture ${
+          xray.climateShift.summerMoistureDeltaPct >= 0 ? "+" : ""
+        }${xray.climateShift.summerMoistureDeltaPct.toFixed(1)}%.`,
+      ]
+    : [];
+
   return [
     buildResult(
       "baseline",
@@ -1351,6 +1381,7 @@ export function generateRotationStrategies(
           "Your exact 4-year starting baseline evaluated with FAO-56 evapotranspiration, IPCC Tier-1 N2O emissions, and RUSLE slope erosion.",
         satelliteAndSoilEvidence: [
           `NASA SMAP & POWER show July root-zone moisture dropping to ${minRootMoisture}% (${maxTemp}°C peak heat; seasonal FAO-56 ET0 = ${seasonalEt0} mm).`,
+          ...climateShiftBullet,
           `NASA SRTM (${xray.slopePct.toFixed(
             1
           )}% slope) + ISRIC SoilGrids (${xray.soil.textureClass}) project ~${Math.round(
@@ -1406,6 +1437,7 @@ export function generateRotationStrategies(
           `RUSLE slope-cover model cuts bare-soil exposure to ~${slashSteps[0].bareMonths}–1.4 months/yr on ${xray.slopePct.toFixed(
             1
           )}% SRTM slopes.`,
+          ...climateShiftBullet,
           `ISRIC SoilGrids pH (${xray.soil.ph}) and ${xray.soil.textureClass} profile support biological N2 fixation (+55–80 kg N/ha), avoiding Haber-Bosch & IPCC Tier-1 N2O flux.`,
           `FAO-56 water balance (${seasonalEt0} mm seasonal ET0) + local basis favors ${shortName(
             s2Year3,
@@ -1416,7 +1448,11 @@ export function generateRotationStrategies(
           )}.`,
         ],
         quantifiedBenefits: [
-          "Unlocks €60/ha per year in EU GAP Eco-Scheme legume bonuses.",
+          subsidies.oeko2LegumeRotation ||
+          subsidies.faktPulseBonus ||
+          subsidies.faktCoverCrop
+            ? "Stacks active EU GAP Eco-Scheme & FAKT II bonuses on eligible legumes and cover crops."
+            : "Generates positive market gross margin even with €0/ha regional subsidies.",
           "Cuts synthetic mineral Nitrogen, nitrous oxide (N2O, 273x GWP), and winter NO3- groundwater percolation.",
         ],
         informationGapsAndUncertainty:

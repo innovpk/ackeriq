@@ -8,6 +8,7 @@ import {
 } from "@/data/agronomyCatalog";
 import { deriveRegionalCropProfile } from "@/lib/cropSuitability";
 import type {
+  ClimateShiftAnomaly,
   FarmXrayData,
   MonthlyClimatePoint,
   SoilProfile,
@@ -95,6 +96,79 @@ async function fetchNasaPowerMonthly(
         stressFlag,
       };
     });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Multi-decade NASA POWER historical vs. recent summer climate-shift anomaly
+ * (1991–2005 baseline vs. 2015–2024 recent summer Jun–Aug T2M_MAX & GWETROOT).
+ */
+async function fetchNasaPowerClimateShift(
+  lat: number,
+  lon: number
+): Promise<ClimateShiftAnomaly | null> {
+  try {
+    const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M_MAX,GWETROOT&community=AG&start=1991&end=2024&longitude=${lon.toFixed(
+      4
+    )}&latitude=${lat.toFixed(4)}&format=JSON`;
+
+    interface PowerMonthlyResp {
+      properties?: {
+        parameter?: {
+          T2M_MAX?: Record<string, number>;
+          GWETROOT?: Record<string, number>;
+        };
+      };
+    }
+
+    const data = await fetchJsonWithTimeout<PowerMonthlyResp>(url, {}, 4600);
+    const tMap = data.properties?.parameter?.T2M_MAX;
+    const mMap = data.properties?.parameter?.GWETROOT;
+    if (!tMap || !mMap) return null;
+
+    const summerMonths = ["06", "07", "08"];
+    const collectMean = (
+      series: Record<string, number>,
+      startYear: number,
+      endYear: number
+    ): number | null => {
+      let sum = 0;
+      let count = 0;
+      for (let y = startYear; y <= endYear; y++) {
+        for (const mm of summerMonths) {
+          const val = series[`${y}${mm}`];
+          if (typeof val === "number" && Number.isFinite(val) && val > -90) {
+            sum += val;
+            count++;
+          }
+        }
+      }
+      return count >= 9 ? sum / count : null;
+    };
+
+    const baseTemp = collectMean(tMap, 1991, 2005);
+    const recentTemp = collectMean(tMap, 2015, 2024);
+    const baseMoist = collectMean(mMap, 1991, 2005);
+    const recentMoist = collectMean(mMap, 2015, 2024);
+
+    if (
+      baseTemp === null ||
+      recentTemp === null ||
+      baseMoist === null ||
+      recentMoist === null
+    ) {
+      return null;
+    }
+
+    return {
+      baselinePeriod: "1991–2005",
+      recentPeriod: "2015–2024",
+      summerTempDeltaC: Number((recentTemp - baseTemp).toFixed(1)),
+      summerMoistureDeltaPct: Math.round((recentMoist - baseMoist) * 100),
+      liveMeasured: true,
+    };
   } catch {
     return null;
   }
@@ -212,17 +286,24 @@ async function fetchReversePlaceName(
         town?: string;
         city?: string;
         county?: string;
+        state?: string;
+        country?: string;
+        country_code?: string;
       };
     }
     const res = await fetchJsonWithTimeout<NomResp>(url, {}, 3000);
     const a = res.address;
     if (!a) return null;
     const locality =
-      a.village || a.town || a.suburb || a.city || "Stuttgart Field";
-    const county = a.county || "Region Stuttgart";
+      a.village || a.town || a.suburb || a.city || a.county || "Arable Field";
+    const cc = (a.country_code || "").toUpperCase();
+    const regionTail =
+      cc && cc !== "DE"
+        ? [a.state || a.county, a.country].filter(Boolean).join(", ")
+        : a.county || a.state || "Germany";
     return {
       farmTitle: `Farm near ${locality}`,
-      regionLabel: `${locality}, ${county}`,
+      regionLabel: [locality, regionTail].filter(Boolean).join(", "),
     };
   } catch {
     return null;
@@ -253,20 +334,28 @@ export async function GET(request: NextRequest) {
   const fallbackPreset =
     matchedPreset ?? resolveNearestHeilbronnPreset(lat, lon);
 
-  const [livePower, liveTerrain, liveSoilGrids, livePlace] = await Promise.all([
-    fetchNasaPowerMonthly(lat, lon),
-    fetchSrtmTerrain(lat, lon),
-    fetchSoilGrids(lat, lon),
-    !matchedPreset && !customAddressLabel
-      ? fetchReversePlaceName(lat, lon)
-      : Promise.resolve(null),
-  ]);
+  const [livePower, liveClimateShift, liveTerrain, liveSoilGrids, livePlace] =
+    await Promise.all([
+      fetchNasaPowerMonthly(lat, lon),
+      fetchNasaPowerClimateShift(lat, lon),
+      fetchSrtmTerrain(lat, lon),
+      fetchSoilGrids(lat, lon),
+      !matchedPreset && !customAddressLabel
+        ? fetchReversePlaceName(lat, lon)
+        : Promise.resolve(null),
+    ]);
 
   const liveSourcesUsed: string[] = ["NASA GIBS Satellite"];
   if (livePower) liveSourcesUsed.push("NASA POWER Weather (Live)");
   else liveSourcesUsed.push("NASA POWER Weather");
 
-  if (liveTerrain) liveSourcesUsed.push("NASA SRTM Slope (Live)");
+  if (liveClimateShift) {
+    liveSourcesUsed.push("NASA POWER Climate Shift (1991–2024)");
+  }
+
+  if (liveTerrain) {
+    liveSourcesUsed.push("NASA SRTM / Copernicus DEM Slope (Live)");
+  }
   if (liveSoilGrids) liveSourcesUsed.push("ISRIC SoilGrids (Live)");
   else liveSourcesUsed.push("BW Soil Survey");
 
@@ -276,6 +365,13 @@ export async function GET(request: NextRequest) {
     : liveTerrain?.slopePct ?? fallbackPreset.xray.slopePct;
 
   const monthlyClimate = livePower ?? fallbackPreset.xray.monthlyClimate;
+  const climateShift: ClimateShiftAnomaly = liveClimateShift ?? {
+    baselinePeriod: "1991–2005",
+    recentPeriod: "2015–2024",
+    summerTempDeltaC: 1.5,
+    summerMoistureDeltaPct: -7,
+    liveMeasured: false,
+  };
 
   const inBw = isInsideBadenWuerttemberg(lat, lon);
 
@@ -317,7 +413,7 @@ export async function GET(request: NextRequest) {
     customFullAddress ||
     customAddressLabel ||
     livePlace?.regionLabel ||
-    `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`;
+    `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
 
   const dynamicRegional = matchedPreset
     ? null
@@ -349,6 +445,11 @@ export async function GET(request: NextRequest) {
     defaultAreaHa: matchedPreset ? matchedPreset.xray.defaultAreaHa : 165,
     elevationM,
     slopePct,
+    isNitrateRestricted: matchedPreset
+      ? matchedPreset.xray.isNitrateRestricted
+      : inBw
+      ? fallbackPreset.xray.isNitrateRestricted
+      : false,
     producedCropIds: matchedPreset
       ? matchedPreset.xray.producedCropIds
       : dynamicRegional!.producedCropIds,
@@ -361,6 +462,7 @@ export async function GET(request: NextRequest) {
     estimatedNLossPct,
     plainSummary,
     monthlyClimate,
+    climateShift,
     soil: mergedSoil,
     parcels: buildHeilbronnParcels(lat, lon, slopePct),
     liveSourcesUsed,

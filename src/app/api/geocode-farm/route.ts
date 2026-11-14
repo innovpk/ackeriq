@@ -26,26 +26,34 @@ async function fetchWithTimeout<T>(url: string, timeoutMs = 3500): Promise<T> {
   }
 }
 
+function formatCoordLabel(lat: number, lon: number): string {
+  const ns = lat >= 0 ? "N" : "S";
+  const ew = lon >= 0 ? "E" : "W";
+  return `${Math.abs(lat).toFixed(4)}°${ns}, ${Math.abs(lon).toFixed(4)}°${ew}`;
+}
+
 export async function GET(request: NextRequest) {
   const q = (request.nextUrl.searchParams.get("q") || "").trim();
   if (q.length < 2) {
     return Response.json({ results: [] });
   }
 
-  // Support direct "lat, lon" coordinate input (e.g., "49.142, 9.218")
+  // Support direct "lat, lon" coordinate input globally (e.g., "49.142, 9.218" or "41.878, -93.097")
   const coordMatch = q.match(
     /^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
   );
   if (coordMatch) {
     const lat = Number(coordMatch[1]);
     const lon = Number(coordMatch[2]);
-    if (lat >= 47 && lat <= 55 && lon >= 5 && lon <= 16) {
+    if (lat >= -65 && lat <= 72 && lon >= -180 && lon <= 180) {
+      const inGermany = lat >= 47 && lat <= 55 && lon >= 5 && lon <= 16;
+      const formatted = formatCoordLabel(lat, lon);
       return Response.json({
         results: [
           {
             id: `coord-${lat}-${lon}`,
-            shortTitle: `GPS Pin (${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)`,
-            fullAddress: `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E · Germany`,
+            shortTitle: `GPS Pin (${formatted})`,
+            fullAddress: `${formatted} · ${inGermany ? "Germany" : "Global Coordinate"}`,
             lat,
             lon,
           },
@@ -54,11 +62,11 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 1. Primary: Photon (Komoot OSM Geocoder — ultra-fast German street/PLZ/village search, biased near Stuttgart 48.78, 9.18)
+  // 1. Primary: Photon (Komoot OSM Geocoder — biased toward Stuttgart/BW first, with global support)
   try {
     const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(
       q
-    )}&lat=48.7758&lon=9.1829&limit=8&lang=de`;
+    )}&lat=48.7758&lon=9.1829&limit=10`;
 
     interface PhotonResp {
       features?: Array<{
@@ -72,26 +80,29 @@ export async function GET(request: NextRequest) {
           city?: string;
           county?: string;
           state?: string;
+          country?: string;
           countrycode?: string;
         };
       }>;
     }
 
     const data = await fetchWithTimeout<PhotonResp>(photonUrl, 3200);
-    const deFeatures = (data.features || []).filter((f) => {
-      const cc = (f.properties?.countrycode || "").toUpperCase();
-      return !cc || cc === "DE";
+    const allFeatures = [...(data.features || [])].sort((a, b) => {
+      const aDe = (a.properties?.countrycode || "").toUpperCase() === "DE" ? 0 : 1;
+      const bDe = (b.properties?.countrycode || "").toUpperCase() === "DE" ? 0 : 1;
+      return aDe - bDe;
     });
 
-    if (deFeatures.length > 0) {
+    if (allFeatures.length > 0) {
       const results: GeocodeFarmResult[] = [];
       const seen = new Set<string>();
 
-      for (const f of deFeatures) {
+      for (const f of allFeatures) {
         const coords = f.geometry?.coordinates;
         const p = f.properties;
         if (!coords || !p) continue;
         const [lon, lat] = coords;
+        const cc = (p.countrycode || "").toUpperCase();
 
         const streetPart = p.street
           ? `${p.street}${p.housenumber ? ` ${p.housenumber}` : ""}`
@@ -109,6 +120,7 @@ export async function GET(request: NextRequest) {
           cityPart !== streetPart ? cityPart : null,
           p.county,
           p.state,
+          cc && cc !== "DE" ? p.country || cc : null,
         ]
           .filter(Boolean)
           .join(", ");
@@ -136,9 +148,9 @@ export async function GET(request: NextRequest) {
     // Fall through to Nominatim backup
   }
 
-  // 2. Fallback: OpenStreetMap Nominatim (Germany-scoped, Region Stuttgart viewbox priority)
+  // 2. Fallback: OpenStreetMap Nominatim (Region Stuttgart viewbox priority, global unbounded support)
   try {
-    const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=de&viewbox=8.65,49.05,9.55,48.45&bounded=0&limit=5&addressdetails=1&q=${encodeURIComponent(
+    const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&viewbox=8.65,49.05,9.55,48.45&bounded=0&limit=5&addressdetails=1&q=${encodeURIComponent(
       q
     )}`;
 
@@ -156,6 +168,8 @@ export async function GET(request: NextRequest) {
         city?: string;
         county?: string;
         state?: string;
+        country?: string;
+        country_code?: string;
       };
     }
 
