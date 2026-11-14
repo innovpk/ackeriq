@@ -15,7 +15,7 @@ fi
 
 gcloud run deploy "$SERVICE" \
   --quiet \
-  "${ACCOUNT_ARGS[@]}" \
+  ${ACCOUNT_ARGS[@]+"${ACCOUNT_ARGS[@]}"} \
   --project "$PROJECT" \
   --source . \
   --region "$REGION" \
@@ -31,7 +31,7 @@ gcloud run deploy "$SERVICE" \
 echo ""
 echo "Deployed. Service URL:"
 gcloud run services describe "$SERVICE" \
-  "${ACCOUNT_ARGS[@]}" \
+  ${ACCOUNT_ARGS[@]+"${ACCOUNT_ARGS[@]}"} \
   --project "$PROJECT" \
   --region "$REGION" \
   --format='value(status.url)'
