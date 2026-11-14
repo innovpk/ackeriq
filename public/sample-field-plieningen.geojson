@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "name": "Plieningen_Filder_Sample_Parcel",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "farm": "Filder Plain Farm — Stuttgart-Plieningen",
+        "crop": "Winter Wheat"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [9.2082, 48.7024],
+            [9.2225, 48.7024],
+            [9.2238, 48.7112],
+            [9.2074, 48.7108],
+            [9.2082, 48.7024]
+          ]
+        ]
+      }
+    }
+  ]
+}
