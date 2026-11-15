@@ -156,9 +156,9 @@ export function CustomCropSuitabilityPanel({
   ).length;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 xl:gap-5 items-stretch">
       {/* Left 4 Cols: Add / Test Any Custom Crop */}
-      <div className="lg:col-span-4 rounded-2xl border border-zinc-200/90 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] space-y-3.5">
+      <div className="lg:col-span-4 rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-4">
         <div>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
             <Sparkles className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export function CustomCropSuitabilityPanel({
       </div>
 
       {/* Right 8 Cols: Live Telemetry Strip + Custom Verdicts + Regional Matrix */}
-      <div className="lg:col-span-8 space-y-3.5">
+      <div className="lg:col-span-8 flex flex-col justify-between gap-4">
         {/* Live Farm Biophysical Conditions Strip */}
         <div className="rounded-2xl border border-zinc-200/90 bg-zinc-50/80 p-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="rounded-xl bg-white border border-zinc-200/80 px-3 py-2">

@@ -174,7 +174,7 @@ export function OrbitalSplashScreen({
     <div className="min-h-dvh bg-white text-zinc-950 flex flex-col justify-between overflow-x-hidden">
       {/* Minimal Pure-White Header */}
       <header className="w-full bg-white border-b border-zinc-200/80">
-        <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 h-13 flex items-center justify-between gap-3">
+        <div className="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-emerald-700 flex items-center justify-center text-white">
               <Sprout className="w-5 h-5" />
@@ -229,9 +229,9 @@ export function OrbitalSplashScreen({
         </div>
       </header>
 
-      {/* Single-Viewport Widescreen Slide Stage */}
+      {/* Full-Viewport Widescreen Slide Stage */}
       <main
-        className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 py-2.5 sm:py-3.5 flex-1 flex flex-col justify-center gap-3"
+        className="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-5 lg:py-6 flex-1 flex flex-col gap-3.5"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onKeyDown={(e) => {
@@ -255,7 +255,7 @@ export function OrbitalSplashScreen({
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveIdx(idx)}
-                  className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer inline-flex items-center gap-2 border ${
+                  className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer inline-flex items-center gap-2 border ${
                     active
                       ? "bg-emerald-700 border-emerald-700 text-white"
                       : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100"
@@ -290,36 +290,58 @@ export function OrbitalSplashScreen({
           </div>
         </div>
 
-        {/* Clean Visual Widescreen Slide Card */}
-        <div className="rounded-3xl border border-zinc-200/90 bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.03),0_20px_44px_rgba(0,0,0,0.06)] grid grid-cols-1 lg:grid-cols-12">
+        {/* Full-Height Visual Widescreen Slide Card */}
+        <div className="flex-1 min-h-[460px] lg:min-h-[560px] rounded-3xl border border-zinc-200/90 bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.03),0_20px_44px_rgba(0,0,0,0.06)] grid grid-cols-1 lg:grid-cols-12 items-stretch">
           {/* Left: Punchy Minimal Copy + Direct Address Input */}
-          <div className="lg:col-span-5 p-5 sm:p-7 xl:p-9 flex flex-col justify-between gap-4">
-            <div className="space-y-3.5">
+          <div className="lg:col-span-5 p-6 sm:p-8 xl:p-11 flex flex-col justify-between gap-6">
+            <div className="space-y-4">
               <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-emerald-700">
                 <Icon className="w-4 h-4" />
                 NASA Farm Intelligence · {slide.num}/04
               </span>
 
-              <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight text-zinc-950 leading-[1.12]">
+              <h1 className="text-3xl sm:text-4xl xl:text-[2.65rem] font-bold tracking-tight text-zinc-950 leading-[1.1]">
                 {slide.headline[lang]}
               </h1>
 
-              <p className="text-sm sm:text-base text-zinc-600 leading-relaxed max-w-xl">
+              <p className="text-sm sm:text-base xl:text-lg text-zinc-600 leading-relaxed max-w-xl">
                 {slide.oneLiner[lang]}
               </p>
 
-              <div className="inline-flex flex-wrap items-baseline gap-2.5 pt-1">
-                <span className="text-2xl sm:text-3xl font-bold text-emerald-800 tabular-nums">
+              <div className="inline-flex flex-wrap items-baseline gap-3 pt-1">
+                <span className="text-3xl sm:text-4xl font-bold text-emerald-800 tabular-nums">
                   {slide.metric[lang]}
                 </span>
                 <span className="text-xs sm:text-sm text-zinc-500">
                   {slide.metricSub[lang]}
                 </span>
               </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(lang === "de"
+                  ? [
+                      "NASA SMAP Bodenfeuchte",
+                      "20cm Hof-Luftbild & Hang",
+                      "ISOXML Traktor-Export",
+                    ]
+                  : [
+                      "NASA SMAP Moisture",
+                      "20cm Farm Aerial & Slope",
+                      "ISOXML Tractor Export",
+                    ]
+                ).map((chip) => (
+                  <span
+                    key={chip}
+                    className="px-3 py-1 rounded-full bg-zinc-50 border border-zinc-200/80 text-xs font-medium text-zinc-700"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
             </div>
 
             {/* Clean Address Bar + Quick Demo Link */}
-            <div className="space-y-2.5 pt-4 border-t border-zinc-100">
+            <div className="space-y-3 pt-5 border-t border-zinc-100">
               <FarmAddressSearch
                 compact
                 placeholder={
@@ -357,8 +379,8 @@ export function OrbitalSplashScreen({
             </div>
           </div>
 
-          {/* Right: Large Clean Real Photography (All 4 slides pre-mounted for instant 0ms switching) */}
-          <div className="relative w-full h-[280px] sm:h-[340px] lg:h-full lg:min-h-[390px] lg:col-span-7 overflow-hidden bg-zinc-900">
+          {/* Right: Large Full-Height Real Photography */}
+          <div className="relative w-full min-h-[300px] sm:min-h-[380px] lg:h-full lg:col-span-7 overflow-hidden bg-zinc-900">
             {SLIDES.map((s, idx) => {
               const isCurrent = idx === activeIdx;
               return (
@@ -408,7 +430,7 @@ export function OrbitalSplashScreen({
 
       {/* Ultra-Clean 1-Line Footer */}
       <footer className="border-t border-zinc-100 bg-white py-2.5 px-4 sm:px-6 lg:px-10">
-        <div className="w-full max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
+        <div className="w-full max-w-[1840px] mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
           <span>
             NASA Earthdata · ISRIC SoilGrids · Live EU Eurostat Prices
           </span>

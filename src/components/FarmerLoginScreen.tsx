@@ -81,7 +81,7 @@ export function FarmerLoginScreen({
   return (
     <div className="min-h-dvh bg-white text-zinc-950 flex flex-col justify-between overflow-x-hidden">
       <header className="w-full bg-white border-b border-zinc-200/80">
-        <div className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 h-13 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={onBackToWelcome}
@@ -131,10 +131,10 @@ export function FarmerLoginScreen({
         </div>
       </header>
 
-      <main className="w-full max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex-1 flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-8 w-full items-stretch">
+      <main className="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-6 flex-1 flex flex-col">
+        <div className="flex-1 min-h-[500px] lg:min-h-[580px] grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 w-full items-stretch">
           {/* Left: 1-Click Demo + Compact Sign-In */}
-          <div className="lg:col-span-5 flex flex-col justify-center space-y-4">
+          <div className="lg:col-span-5 flex flex-col justify-center space-y-5">
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">
                 {lang === "de"
@@ -272,7 +272,7 @@ export function FarmerLoginScreen({
           </div>
 
           {/* Right: Clean Photo + 3 Crisp Pills */}
-          <div className="lg:col-span-7 relative w-full h-[340px] lg:h-full lg:min-h-[430px] rounded-3xl overflow-hidden border border-zinc-200/90 bg-zinc-900 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+          <div className="lg:col-span-7 relative w-full min-h-[360px] lg:h-full rounded-3xl overflow-hidden border border-zinc-200/90 bg-zinc-900 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
             <ResilientImage
               src="/images/tractor-precision-cab.jpg"
               alt="Precision farming cab view over Region Stuttgart fields"
@@ -281,8 +281,8 @@ export function FarmerLoginScreen({
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 text-white space-y-2.5">
-              <h2 className="text-2xl font-bold tracking-tight">
+            <div className="absolute bottom-7 left-7 right-7 text-white space-y-2.5">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {lang === "de"
                   ? "Fruchtfolge-Planung & Traktor N-Karten"
                   : "Crop Rotation & Tractor N-Map Suite"}
@@ -302,7 +302,7 @@ export function FarmerLoginScreen({
                 ).map((pill) => (
                   <span
                     key={pill}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-xs font-medium"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     {pill}
@@ -313,6 +313,15 @@ export function FarmerLoginScreen({
           </div>
         </div>
       </main>
+
+      <footer className="border-t border-zinc-100 bg-white py-2.5 px-4 sm:px-6 lg:px-10">
+        <div className="w-full max-w-[1840px] mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
+          <span>
+            NASA Earthdata · ISRIC SoilGrids · Live EU Eurostat Prices
+          </span>
+          <span className="font-mono">NASA Space Apps 2026</span>
+        </div>
+      </footer>
     </div>
   );
 }

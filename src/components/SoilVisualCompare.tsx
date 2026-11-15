@@ -16,10 +16,10 @@ export function SoilVisualCompare({
   const [splitPct, setSplitPct] = useState<number>(50);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+    <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
       {/* 1. Interactive Before / After Bare Soil vs. Cover Mulch Drag Slider */}
       <div className="lg:col-span-7 rounded-2xl border border-zinc-200/90 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col">
-        <div className="px-4 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2">
+        <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between gap-2">
           <span className="text-xs font-bold text-zinc-900">
             Spring Rain Runoff — Drag to Compare
           </span>
@@ -28,7 +28,7 @@ export function SoilVisualCompare({
           </span>
         </div>
 
-        <div className="relative h-56 sm:h-64 min-h-[224px] sm:min-h-[256px] lg:h-[calc(100dvh-345px)] lg:min-h-[215px] lg:max-h-[340px] w-full select-none overflow-hidden bg-zinc-900">
+        <div className="relative min-h-[300px] sm:min-h-[360px] lg:h-[calc(100dvh-295px)] lg:min-h-[430px] flex-1 w-full select-none overflow-hidden bg-zinc-900">
           {/* Base Layer (Right Side): Healthy Green Cover Mulch */}
           <ResilientImage
             src="/images/soil-cover-mulch.jpg"
@@ -94,7 +94,7 @@ export function SoilVisualCompare({
           </span>
         </div>
 
-        <div className="relative h-56 sm:h-64 min-h-[224px] sm:min-h-[256px] lg:h-[calc(100dvh-345px)] lg:min-h-[215px] lg:max-h-[340px] w-full bg-zinc-900 overflow-hidden">
+        <div className="relative min-h-[300px] sm:min-h-[360px] lg:h-[calc(100dvh-295px)] lg:min-h-[430px] flex-1 w-full bg-zinc-900 overflow-hidden">
           <ResilientImage
             src="/images/soil-root-cutaway.jpg"
             alt="Cross section comparing shallow stressed corn roots with deep soybean and sunflower taproots"

@@ -51,15 +51,15 @@ export function ClimateSoilCharts({
     <div
       className={
         mode === "both"
-          ? "grid grid-cols-1 lg:grid-cols-12 gap-6"
-          : "w-full"
+          ? "flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
+          : "flex-1 flex flex-col w-full"
       }
     >
       {showClimate && (
         <div
           className={`${
-            mode === "both" ? "lg:col-span-7" : "w-full"
-          } rounded-2xl border border-zinc-200/90 bg-white p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.04)] space-y-3.5`}
+            mode === "both" ? "lg:col-span-7" : "w-full flex-1"
+          } rounded-2xl border border-zinc-200/90 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-4`}
         >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
@@ -89,7 +89,7 @@ export function ClimateSoilCharts({
             </div>
           </div>
 
-          <div className="h-48 sm:h-52 xl:h-56 w-full">
+          <div className="h-64 sm:h-72 lg:h-[calc(100dvh-435px)] lg:min-h-[260px] flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={climateChartData}
@@ -212,8 +212,8 @@ export function ClimateSoilCharts({
       {showComparison && (
         <div
           className={`${
-            mode === "both" ? "lg:col-span-5" : "w-full"
-          } rounded-2xl border border-zinc-200/90 bg-white p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.04)] space-y-3.5`}
+            mode === "both" ? "lg:col-span-5" : "w-full flex-1"
+          } rounded-2xl border border-zinc-200/90 bg-white p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-4`}
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -229,7 +229,7 @@ export function ClimateSoilCharts({
             </span>
           </div>
 
-          <div className="h-48 sm:h-52 xl:h-56 w-full">
+          <div className="h-64 sm:h-72 lg:h-[calc(100dvh-360px)] lg:min-h-[280px] flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={comparisonData}

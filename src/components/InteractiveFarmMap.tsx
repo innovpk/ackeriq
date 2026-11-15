@@ -271,7 +271,7 @@ export function InteractiveFarmMap({
           if (rect.width <= 0 || rect.height <= 0) return;
 
           try {
-            activeMap.invalidateSize({ animate: false, pan: false });
+            activeMap.invalidateSize({ animate: false });
             if (!isDrawingRef.current && !hasCustomPolyRef.current) {
               activeMap.setView(
                 [latestViewRef.current.lat, latestViewRef.current.lon],
@@ -285,6 +285,16 @@ export function InteractiveFarmMap({
         });
         ro.observe(containerRef.current);
       }
+
+      requestAnimationFrame(() => {
+        if (!cancelled && mapRef.current) {
+          try {
+            mapRef.current.invalidateSize({ animate: false });
+          } catch {
+            // Ignore
+          }
+        }
+      });
     }
 
     initMap();
@@ -718,13 +728,13 @@ export function InteractiveFarmMap({
         </div>
       </div>
 
-      {/* Map Viewport — Fluid & Fits 100% Inside Visible Viewport */}
+      {/* Map Viewport — Expands to Fill Full Vertical Screen Real Estate */}
       <div
-        className={`relative h-[290px] sm:h-[340px] lg:h-[calc(100dvh-260px)] lg:min-h-[320px] lg:max-h-[520px] flex-1 w-full bg-zinc-100 ${
+        className={`relative min-h-[360px] sm:min-h-[440px] lg:h-[calc(100dvh-230px)] lg:min-h-[500px] flex-1 w-full bg-zinc-900 overflow-hidden ${
           isDrawing ? "cursor-crosshair" : ""
         }`}
       >
-        <div ref={containerRef} className="w-full h-full" />
+        <div ref={containerRef} className="absolute inset-0 w-full h-full" />
 
         {/* GeoJSON / KML Import Feedback Pill */}
         {importNotice && (

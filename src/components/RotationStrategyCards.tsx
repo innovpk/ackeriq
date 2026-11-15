@@ -104,7 +104,7 @@ export function RotationStrategyCards({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+    <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 xl:gap-5 items-stretch">
       {strategies.map((strategy) => {
         const isTopPick = strategy.id === topAdaptedId;
         const isOpen = !!expandedExplainIds[strategy.id];
@@ -113,7 +113,7 @@ export function RotationStrategyCards({
         return (
           <article
             key={strategy.id}
-            className={`rounded-2xl bg-white transition-all flex flex-col overflow-hidden ${
+            className={`rounded-2xl bg-white transition-all flex flex-col justify-between overflow-hidden h-full ${
               isTopPick
                 ? "border-2 border-emerald-700 shadow-[0_8px_28px_rgba(21,128,61,0.12)]"
                 : "border border-zinc-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)]"
@@ -269,18 +269,18 @@ export function RotationStrategyCards({
             </div>
 
             {/* Clean Visual 4-Year Crop Rows */}
-            <div className="p-3 space-y-1.5 bg-zinc-50/40 border-b border-zinc-200/80">
+            <div className="flex-1 p-3.5 flex flex-col justify-between gap-2 bg-zinc-50/40 border-b border-zinc-200/80">
               {strategy.steps.map((step) => (
                 <div
                   key={step.year}
-                  className="rounded-xl bg-white border border-zinc-200/80 px-2.5 py-1.5 flex items-center justify-between gap-2.5"
+                  className="flex-1 rounded-xl bg-white border border-zinc-200/80 px-3 py-2 flex items-center justify-between gap-2.5"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-zinc-200/80 bg-zinc-900">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-zinc-200/80 bg-zinc-900">
                       <ResilientImage
                         src={step.crop.imageUrl}
                         alt={step.crop.name}
-                        sizes="36px"
+                        sizes="40px"
                         className="object-cover"
                       />
                     </div>

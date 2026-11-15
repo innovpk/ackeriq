@@ -216,11 +216,11 @@ export function OwnerFarmSatelliteView({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+    <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
       {/* 1. Left (7 cols): Full Owner's Farm Real Satellite / Orthophoto Footprint */}
       {!expandedFullWidth && (
         <div className="lg:col-span-7 rounded-2xl border border-zinc-200/90 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col">
-          <div className="px-4 py-2.5 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+          <div className="px-4 py-3 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Satellite className="w-4 h-4 text-emerald-700 shrink-0" />
               <span className="text-xs font-bold text-zinc-950">
@@ -260,7 +260,7 @@ export function OwnerFarmSatelliteView({
             </button>
           </div>
 
-          <div className="relative h-56 sm:h-64 min-h-[224px] sm:min-h-[256px] lg:h-[calc(100dvh-345px)] lg:min-h-[215px] lg:max-h-[340px] w-full bg-zinc-900 overflow-hidden select-none">
+          <div className="relative min-h-[300px] sm:min-h-[360px] lg:h-[calc(100dvh-295px)] lg:min-h-[430px] flex-1 w-full bg-zinc-900 overflow-hidden select-none">
             <ResilientImage
               src={fieldSatelliteUrl}
               alt={`Live satellite orthophoto of ${xray.name} at ${xray.lat.toFixed(
@@ -329,7 +329,7 @@ export function OwnerFarmSatelliteView({
           expandedFullWidth ? "lg:col-span-12" : "lg:col-span-5"
         } rounded-2xl border border-zinc-200/90 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col`}
       >
-        <div className="px-4 py-2.5 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+        <div className="px-4 py-3 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-bold text-zinc-950">
             {lang === "de"
               ? "20cm Nahaufnahme (Hof & Fahrgassen)"
@@ -392,7 +392,7 @@ export function OwnerFarmSatelliteView({
           </div>
         </div>
 
-        <div className="relative h-56 sm:h-64 min-h-[224px] sm:min-h-[256px] lg:h-[calc(100dvh-345px)] lg:min-h-[215px] lg:max-h-[340px] w-full bg-zinc-900 overflow-hidden select-none">
+        <div className="relative min-h-[300px] sm:min-h-[360px] lg:h-[calc(100dvh-295px)] lg:min-h-[430px] flex-1 w-full bg-zinc-900 overflow-hidden select-none">
           {interactivePanZoom ? (
             <>
               <div

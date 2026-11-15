@@ -477,7 +477,7 @@ export default function AckerIQPage() {
     <div className="min-h-dvh flex flex-col bg-white text-zinc-950 overflow-x-hidden">
       {/* Crisp Pure-White Header with Interactive 4-Step Progress Bar & EN|DE Switcher */}
       <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-zinc-200/80">
-        <div className="w-full max-w-[1680px] mx-auto px-3.5 sm:px-6 lg:px-10 min-h-13 py-1.5 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="w-full max-w-[1840px] mx-auto px-3.5 sm:px-6 lg:px-10 min-h-14 py-1.5 flex flex-wrap items-center justify-between gap-2.5">
           <button
             type="button"
             onClick={() => {
@@ -601,14 +601,14 @@ export default function AckerIQPage() {
         </div>
       </header>
 
-      <main className="w-full max-w-[1680px] mx-auto px-3.5 sm:px-6 lg:px-10 py-2.5 sm:py-3.5 flex-1 flex flex-col justify-center">
+      <main className="w-full max-w-[1840px] mx-auto px-3.5 sm:px-6 lg:px-10 py-3.5 sm:py-4 lg:py-5 flex-1 flex flex-col">
         {/* =========================================================
             STEP 1: LOCATE YOUR FARM & DRAW FIELD OR ENTER HECTARES
            ========================================================= */}
         {step === 1 && (
           <section
             aria-label="Step 1: Locate your farm"
-            className="space-y-3"
+            className="flex-1 flex flex-col gap-3.5"
           >
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div>
@@ -632,9 +632,9 @@ export default function AckerIQPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <div className="lg:col-span-4 flex flex-col justify-between gap-3">
-                <div className="bg-white rounded-2xl border border-zinc-200/90 p-3.5 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] space-y-3">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
+              <div className="lg:col-span-4 flex flex-col justify-between gap-4">
+                <div className="flex-1 bg-white rounded-2xl border border-zinc-200/90 p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col justify-between gap-4">
                   <div className="space-y-1.5">
                     <div className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
                       {t.enterAddressLabel}
@@ -722,7 +722,7 @@ export default function AckerIQPage() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-zinc-200/90 p-3.5 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] space-y-2.5">
+                <div className="bg-white rounded-2xl border border-zinc-200/90 p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] space-y-3">
                   <label
                     htmlFor="farm-hectares-input"
                     className="block text-xs font-semibold uppercase tracking-wider text-zinc-500"
@@ -769,6 +769,33 @@ export default function AckerIQPage() {
                       ))}
                     </div>
                   </div>
+
+                  <div className="pt-2.5 border-t border-zinc-100 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl bg-zinc-50/90 border border-zinc-200/70 px-2 py-2">
+                      <div className="text-[10px] font-medium text-zinc-500">
+                        {lang === "de" ? "Höhe & Hang" : "Elev & Slope"}
+                      </div>
+                      <div className="text-xs font-mono font-bold text-zinc-900 tabular-nums mt-0.5">
+                        {xray.elevationM}m · {xray.slopePct.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-zinc-50/90 border border-zinc-200/70 px-2 py-2">
+                      <div className="text-[10px] font-medium text-zinc-500">
+                        {lang === "de" ? "Bodenart" : "Soil Type"}
+                      </div>
+                      <div className="text-xs font-bold text-zinc-900 truncate mt-0.5">
+                        {xray.soil.textureClass}
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-zinc-50/90 border border-zinc-200/70 px-2 py-2">
+                      <div className="text-[10px] font-medium text-zinc-500">
+                        {lang === "de" ? "Boden-pH" : "Soil pH"}
+                      </div>
+                      <div className="text-xs font-mono font-bold text-emerald-800 tabular-nums mt-0.5">
+                        pH {xray.soil.ph}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -793,7 +820,7 @@ export default function AckerIQPage() {
         {step === 2 && (
           <section
             aria-label="Step 2: Confirm your current crops"
-            className="space-y-4"
+            className="flex-1 flex flex-col justify-between gap-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -840,7 +867,7 @@ export default function AckerIQPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
               {([0, 1, 2, 3] as const).map((yearIdx) => {
                 const selectedCropId = currentCropIds[yearIdx];
                 const selectedCrop =
@@ -869,9 +896,9 @@ export default function AckerIQPage() {
                 return (
                   <div
                     key={yearIdx}
-                    className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col justify-between"
+                    className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03),0_8px_20px_rgba(0,0,0,0.04)] flex flex-col justify-between h-full"
                   >
-                    <div className="relative h-24 xl:h-28 w-full bg-zinc-900 overflow-hidden">
+                    <div className="relative h-32 sm:h-36 xl:h-44 2xl:h-52 w-full bg-zinc-900 overflow-hidden shrink-0">
                       <ResilientImage
                         src={selectedCrop.imageUrl}
                         alt={selectedCrop.name}
@@ -1189,12 +1216,12 @@ export default function AckerIQPage() {
 
         {/* =========================================================
             STEP 3: VISUAL FIELD, 7-DAY SPREADER WEATHER & SATELLITE SCAN
-            (Zero-Scroll Widescreen Tabbed Stage)
+            (Full-Viewport Widescreen Tabbed Stage)
            ========================================================= */}
         {step === 3 && (
           <section
             aria-label="Step 3: NASA satellite and visual soil scan"
-            className="space-y-4"
+            className="flex-1 flex flex-col gap-4"
           >
             {/* Row 1: Title + 3 View Switcher Tabs + Back/Next Actions */}
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1375,48 +1402,50 @@ export default function AckerIQPage() {
               </div>
             </div>
 
-            {/* Row 3: Active Zero-Scroll Visual Stage */}
-            {step3Tab === "satellite" && (
-              <OwnerFarmSatelliteView
-                xray={xray}
-                farmAreaHa={farmAreaHa}
-                lang={lang}
-              />
-            )}
+            {/* Row 3: Active Full-Height Visual Stage */}
+            <div className="flex-1 flex flex-col">
+              {step3Tab === "satellite" && (
+                <OwnerFarmSatelliteView
+                  xray={xray}
+                  farmAreaHa={farmAreaHa}
+                  lang={lang}
+                />
+              )}
 
-            {step3Tab === "visuals" && (
-              <SoilVisualCompare
-                estimatedNLossPct={xray.estimatedNLossPct}
-                minSummerMoisturePct={minSummerMoisturePct}
-              />
-            )}
+              {step3Tab === "visuals" && (
+                <SoilVisualCompare
+                  estimatedNLossPct={xray.estimatedNLossPct}
+                  minSummerMoisturePct={minSummerMoisturePct}
+                />
+              )}
 
-            {step3Tab === "spreader" && (
-              <SpreaderWeatherStrip
-                lat={xray.lat}
-                lon={xray.lon}
-                lang={lang}
-              />
-            )}
+              {step3Tab === "spreader" && (
+                <SpreaderWeatherStrip
+                  lat={xray.lat}
+                  lon={xray.lon}
+                  lang={lang}
+                />
+              )}
 
-            {step3Tab === "climate" && (
-              <ClimateSoilCharts
-                xray={xray}
-                strategies={strategies}
-                mode="climate"
-              />
-            )}
+              {step3Tab === "climate" && (
+                <ClimateSoilCharts
+                  xray={xray}
+                  strategies={strategies}
+                  mode="climate"
+                />
+              )}
+            </div>
           </section>
         )}
 
         {/* =========================================================
             STEP 4: PICK GOAL, SUBSIDY STACKER, 3 PLANS & BENCHMARK
-            (Zero-Scroll Widescreen Tabbed Stage)
+            (Full-Viewport Widescreen Tabbed Stage)
            ========================================================= */}
         {step === 4 && (
           <section
             aria-label="Step 4: Compare 4-year crop rotation plans"
-            className="space-y-3.5"
+            className="flex-1 flex flex-col gap-3.5"
           >
             {/* Row 1: Title + Weather Toggle + Navigation Buttons */}
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1585,143 +1614,152 @@ export default function AckerIQPage() {
               </div>
             </div>
 
-            {/* Row 3: Active Zero-Scroll Tab Stage */}
-            {step4Tab === "plans" && (
-              <RotationStrategyCards
-                isNitrateRestricted={isNitrateRestricted}
-                farmAreaHa={farmAreaHa}
-                strategies={strategies}
-                lang={lang}
-                onOpenTractorMap={(s) => setTractorModalStrategy(s)}
-                onOpenActionPlan={(s) => setActionPlanStrategy(s)}
-              />
-            )}
-
-            {step4Tab === "custom_crops" && (
-              <CustomCropSuitabilityPanel
-                xray={xray}
-                weatherScenario={weatherScenario}
-                customEntries={customCropEntries}
-                onAddOrUpdateEntry={handleAddOrUpdateCustomCrop}
-                onToggleInclude={handleToggleCustomCropInclude}
-                onRemoveEntry={handleRemoveCustomCrop}
-                onViewPlans={() => setStep4Tab("plans")}
-                lang={lang}
-              />
-            )}
-
-            {step4Tab === "subsidies_prices" && (
-              <div className="space-y-4">
-                <SubsidyStackerBar
-                  subsidies={subsidies}
-                  onChange={setSubsidies}
-                  bestStrategy={bestAdapted}
+            {/* Row 3: Active Full-Height Tab Stage */}
+            <div className="flex-1 flex flex-col">
+              {step4Tab === "plans" && (
+                <RotationStrategyCards
+                  isNitrateRestricted={isNitrateRestricted}
                   farmAreaHa={farmAreaHa}
+                  strategies={strategies}
+                  lang={lang}
+                  onOpenTractorMap={(s) => setTractorModalStrategy(s)}
+                  onOpenActionPlan={(s) => setActionPlanStrategy(s)}
+                />
+              )}
+
+              {step4Tab === "custom_crops" && (
+                <CustomCropSuitabilityPanel
+                  xray={xray}
+                  weatherScenario={weatherScenario}
+                  customEntries={customCropEntries}
+                  onAddOrUpdateEntry={handleAddOrUpdateCustomCrop}
+                  onToggleInclude={handleToggleCustomCropInclude}
+                  onRemoveEntry={handleRemoveCustomCrop}
+                  onViewPlans={() => setStep4Tab("plans")}
                   lang={lang}
                 />
+              )}
 
-                <div className="rounded-2xl border border-zinc-200/90 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.03)] space-y-3.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
-                      <Coins className="w-3.5 h-3.5 text-emerald-700" />
-                      {t.liveHub}: {priceFeed.areaMarketLabel}
-                    </span>
+              {step4Tab === "subsidies_prices" && (
+                <div className="flex-1 flex flex-col justify-between gap-4">
+                  <SubsidyStackerBar
+                    subsidies={subsidies}
+                    onChange={setSubsidies}
+                    bestStrategy={bestAdapted}
+                    farmAreaHa={farmAreaHa}
+                    lang={lang}
+                  />
 
-                    {hasCustomPriceEdits && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCustomPrices({});
-                          setCustomFertPrice(undefined);
-                        }}
-                        className="min-h-[32px] px-3 py-1 rounded-lg text-xs font-semibold text-zinc-600 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200/70 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        {t.resetPrices}
-                      </button>
-                    )}
-                  </div>
+                  <div className="flex-1 rounded-2xl border border-zinc-200/90 bg-white p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03),0_6px_16px_rgba(0,0,0,0.03)] flex flex-col justify-between gap-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+                        <Coins className="w-3.5 h-3.5 text-emerald-700" />
+                        {t.liveHub}: {priceFeed.areaMarketLabel}
+                      </span>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {areaPriceCropIds.map((cid) => {
-                      const crop = CROPS_STUTTGART[cid];
-                      const q = priceFeed.quotes[cid];
-                      if (!crop || !q) return null;
-                      const val =
-                        customPrices[cid] ?? q.effectiveLocalPriceEurTon;
-                      return (
-                        <div
-                          key={cid}
-                          className="rounded-xl bg-zinc-50 border border-zinc-200 p-2.5"
+                      {hasCustomPriceEdits && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomPrices({});
+                            setCustomFertPrice(undefined);
+                          }}
+                          className="min-h-[32px] px-3 py-1 rounded-lg text-xs font-semibold text-zinc-600 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200/70 inline-flex items-center gap-1 cursor-pointer"
                         >
-                          <label
-                            htmlFor={`price-${cid}`}
-                            className="block text-[11px] font-semibold text-zinc-700 truncate"
-                          >
-                            {getLocalizedCropDisplayName(crop, xray, lang)} (€/t)
-                          </label>
-                          <input
-                            id={`price-${cid}`}
-                            type="number"
-                            min={20}
-                            max={1200}
-                            step={5}
-                            value={val}
-                            onChange={(e) =>
-                              setCustomPrices((prev) => ({
-                                ...prev,
-                                [cid]: Math.max(
-                                  20,
-                                  Number(e.target.value) || 100
-                                ),
-                              }))
-                            }
-                            className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-sm font-mono font-bold text-zinc-950 tabular-nums"
-                          />
-                        </div>
-                      );
-                    })}
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          {t.resetPrices}
+                        </button>
+                      )}
+                    </div>
 
-                    <div className="rounded-xl bg-amber-50/60 border border-amber-200 p-2.5">
-                      <label
-                        htmlFor="price-fert-n"
-                        className="block text-[11px] font-semibold text-amber-900 truncate"
-                      >
-                        KAS N (€/kg N)
-                      </label>
-                      <input
-                        id="price-fert-n"
-                        type="number"
-                        min={0.5}
-                        max={4.0}
-                        step={0.05}
-                        value={activeFertPrice}
-                        onChange={(e) =>
-                          setCustomFertPrice(
-                            Math.max(0.4, Number(e.target.value) || 1.31)
-                          )
-                        }
-                        className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-sm font-mono font-bold text-zinc-950 tabular-nums"
-                      />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                      {areaPriceCropIds.map((cid) => {
+                        const crop = CROPS_STUTTGART[cid];
+                        const q = priceFeed.quotes[cid];
+                        if (!crop || !q) return null;
+                        const val =
+                          customPrices[cid] ?? q.effectiveLocalPriceEurTon;
+                        return (
+                          <div
+                            key={cid}
+                            className="rounded-xl bg-zinc-50 border border-zinc-200 p-3"
+                          >
+                            <label
+                              htmlFor={`price-${cid}`}
+                              className="block text-xs font-semibold text-zinc-700 truncate"
+                            >
+                              {getLocalizedCropDisplayName(crop, xray, lang)} (€/t)
+                            </label>
+                            <input
+                              id={`price-${cid}`}
+                              type="number"
+                              min={20}
+                              max={1200}
+                              step={5}
+                              value={val}
+                              onChange={(e) =>
+                                setCustomPrices((prev) => ({
+                                  ...prev,
+                                  [cid]: Math.max(
+                                    20,
+                                    Number(e.target.value) || 100
+                                  ),
+                                }))
+                              }
+                              className="mt-1.5 w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-sm font-mono font-bold text-zinc-950 tabular-nums"
+                            />
+                          </div>
+                        );
+                      })}
+
+                      <div className="rounded-xl bg-amber-50/60 border border-amber-200 p-3">
+                        <label
+                          htmlFor="price-fert-n"
+                          className="block text-xs font-semibold text-amber-900 truncate"
+                        >
+                          KAS N (€/kg N)
+                        </label>
+                        <input
+                          id="price-fert-n"
+                          type="number"
+                          min={0.5}
+                          max={4.0}
+                          step={0.05}
+                          value={activeFertPrice}
+                          onChange={(e) =>
+                            setCustomFertPrice(
+                              Math.max(0.4, Number(e.target.value) || 1.31)
+                            )
+                          }
+                          className="mt-1.5 w-full rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-sm font-mono font-bold text-zinc-950 tabular-nums"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
+                      <span>
+                        {lang === "de"
+                          ? "Offizielle EU Eurostat Erzeugerpreise + EZB Referenzkurs + regionale BW/Stuttgart Erfassungsbasis."
+                          : "Official EU Eurostat output prices + ECB reference FX + regional Baden-Württemberg mill & hub basis."}
+                      </span>
+                      <span className="font-mono text-zinc-400">
+                        Eurostat apri_ap_crpouta · Live
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {step4Tab === "benchmark" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-                <div className="lg:col-span-6 flex">
-                  <div className="w-full">
+              {step4Tab === "benchmark" && (
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                  <div className="lg:col-span-6 flex flex-col">
                     <StuttgartBenchmarkCard
                       baseline={baselineStrategy}
                       bestAdapted={bestAdapted}
                       lang={lang}
                     />
                   </div>
-                </div>
-                <div className="lg:col-span-6 flex">
-                  <div className="w-full">
+                  <div className="lg:col-span-6 flex flex-col">
                     <ClimateSoilCharts
                       xray={xray}
                       strategies={strategies}
@@ -1729,11 +1767,20 @@ export default function AckerIQPage() {
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </section>
         )}
       </main>
+
+      <footer className="border-t border-zinc-100 bg-white py-2 px-4 sm:px-6 lg:px-10">
+        <div className="w-full max-w-[1840px] mx-auto flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
+          <span>
+            NASA POWER · NASA GIBS · NASA SRTM · ISRIC SoilGrids · EU Eurostat
+          </span>
+          <span className="font-mono">AckerIQ · NASA Space Apps 2026</span>
+        </div>
+      </footer>
 
       {/* Modals for Tractor ISOXML Map & Printable Farm Plan */}
       {tractorModalStrategy && (

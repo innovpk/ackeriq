@@ -236,7 +236,7 @@ ${formatIso11783RingXml(z.scaledPolygon, "          ")}
       onClick={onClose}
     >
       <div
-        className="max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-zinc-200 shadow-2xl"
+        className="max-w-6xl w-full max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-zinc-200 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Modal Bar */}
@@ -300,7 +300,7 @@ ${formatIso11783RingXml(z.scaledPolygon, "          ")}
         {/* Visual Split: Satellite Photo + Zone Prescription Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12">
           {/* Left: Real Satellite / Orthophoto View of Owner's Farm + 4-Zone ISOXML Overlay */}
-          <div className="relative h-[285px] md:h-full md:min-h-[285px] md:col-span-6 bg-zinc-900 overflow-hidden">
+          <div className="relative h-[360px] md:h-full md:min-h-[470px] md:col-span-7 bg-zinc-900 overflow-hidden">
             <ResilientImage
               src={buildFarmAerialUrl({
                 lat: xray.lat,
@@ -346,7 +346,7 @@ ${formatIso11783RingXml(z.scaledPolygon, "          ")}
           </div>
 
           {/* Right: Clean Zone Breakdown + 1-Click ISOXML & GeoJSON Exports */}
-          <div className="md:col-span-6 p-5 flex flex-col justify-between gap-4 bg-white">
+          <div className="md:col-span-5 p-5 sm:p-6 flex flex-col justify-between gap-4 bg-white">
             <div className="space-y-2.5">
               <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Georeferenced Sub-Parcel Spreading Rates
